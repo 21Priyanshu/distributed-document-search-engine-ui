@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FileText } from "lucide-react";
 import generateToken from "../api/auth.api";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -8,20 +9,24 @@ export const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  
+const navigate = useNavigate();
 
-    try {
-      await generateToken(email, password);
-      window.location.href = "/documents";
-    } catch (err: any) {
-      setError(err.message || "Invalid credentials");
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true);
+
+  try {
+    const token = await generateToken(email, password);
+    localStorage.setItem("token", token);
+    navigate("/documents"); // ✅ no reload
+  } catch (err: any) {
+    setError(err.message || "Invalid credentials");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">

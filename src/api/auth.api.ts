@@ -16,7 +16,7 @@ export async function generateToken(
   if (userId) url.searchParams.set("userId", userId);
 
   const headers: Record<string, string> = {};
-  if (existingToken) headers["Authorization"] = `Bearer ${existingToken}`;
+  // if (existingToken) headers["Authorization"] = `Bearer ${existingToken}`;
 
   const res = await fetch(url.toString(), {
     method: "POST",
