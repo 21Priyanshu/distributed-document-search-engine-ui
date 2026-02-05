@@ -5,23 +5,29 @@ import { ProtectedRoute } from "./components/common/ProtectedRoute";
 import { Documents } from "./pages/Documents";
 
 function App() {
+  const token = localStorage.getItem("token");
+  console.log("App render, token:", token);
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-
+        {/* Default entry */}
         <Route
-          path="/documents"
-          element={
-            <ProtectedRoute>
-              <AppLayout>
-                <Documents />
-              </AppLayout>
-            </ProtectedRoute>
-          }
+          path="/"
+          element={<Navigate to={token ? "/documents" : "/login"} replace />}
         />
 
-        <Route path="*" element={<Navigate to="/documents" />} />
+        {/* Public */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* Protected */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AppLayout />}>
+            <Route path="/documents" element={<Documents />} />
+          </Route>
+        </Route>
+
+        {/* Catch-all */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

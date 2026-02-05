@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FileText } from "lucide-react";
-import generateToken from "../api/auth.api";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
 export const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -9,29 +9,34 @@ export const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  
-const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { login, token } = useAuth();
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError("");
-  setLoading(true);
-
-  try {
-    const token = await generateToken(email, password);
-    localStorage.setItem("token", token);
-    navigate("/documents"); // ✅ no reload
-  } catch (err: any) {
-    setError(err.message || "Invalid credentials");
-  } finally {
-    setLoading(false);
+  // 🔐 Already logged in → redirect
+  if (token) {
+    return <Navigate to="/documents" replace />;
   }
-};
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      // ✅ update global auth state
+      await login(email);
+      navigate("/documents");
+    } catch (err: any) {
+      setError(err.message || "Invalid credentials");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        
+
         {/* Logo */}
         <div className="flex justify-center mb-4">
           <div className="bg-black text-white p-3 rounded-xl">

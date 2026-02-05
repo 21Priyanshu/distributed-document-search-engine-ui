@@ -1,15 +1,13 @@
 export type DocumentStatus =
-  | "COMPLETED"
+  | "UPLOADED"
   | "PROCESSING"
-  | "PENDING"
+  | "COMPLETED"
   | "FAILED";
 
-export type Document = {
+export interface DocumentDto {
   id: string;
-  name: string;
-  type: string;
-  size: string;
+  title: string;
+  description: string;
   status: DocumentStatus;
-  uploadedBy: string;
-  uploadDate: string;
-};
+  createdAt: string; // ISO timestamp from backend
+}

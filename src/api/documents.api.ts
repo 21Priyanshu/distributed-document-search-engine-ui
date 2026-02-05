@@ -1,3 +1,6 @@
+import type { Status } from "../components/common/document";
+import type { DocumentDto } from "../types/documents";
+
 export type UploadResponse = {
 	documentId: string;
 	status: string;
@@ -44,4 +47,33 @@ export async function uploadDocument(
 	}
 
 	return res.json();
+}
+
+
+
+
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+  first: boolean;
+  last: boolean;
+}
+
+export async function getDocuments(
+  token: string
+): Promise<PageResponse<DocumentDto>> {
+  const response = await fetch("http://localhost:8080/documents", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch documents: ${response.status}`);
+  }
+
+  return response.json();
 }

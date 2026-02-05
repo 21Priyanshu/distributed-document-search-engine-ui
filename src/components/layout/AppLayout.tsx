@@ -1,12 +1,9 @@
 import { useState } from "react";
+import { Outlet } from "react-router-dom";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 
-type Props = {
-  children: React.ReactNode;
-};
-
-export const AppLayout = ({ children }: Props) => {
+export const AppLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -17,7 +14,7 @@ export const AppLayout = ({ children }: Props) => {
         <Header onMenuClick={() => setSidebarOpen(prev => !prev)} />
 
         <main className="flex-1 p-6 overflow-auto">
-          {children}
+          <Outlet />
         </main>
       </div>
     </div>
