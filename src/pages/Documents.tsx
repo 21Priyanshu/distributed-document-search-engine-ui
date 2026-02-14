@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { DocumentTable } from "../components/documents/DocumentTable";
 import { uploadDocument } from "../api/documents.api";
 import { useAuth } from "../components/common/AuthContext";
+import { UploadFormModal } from "../components/documents/UploadFormModal";
 
 export const Documents = () => {
-  const fileRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
 
@@ -21,49 +22,55 @@ export const Documents = () => {
     return () => window.clearTimeout(timeoutId);
   }, [searchQuery]);
 
-  const onUploadClick = () => fileRef.current?.click();
-
-  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const handleUpload = async (files: FileList, description: string) => {
     if (!token) {
-      alert("You must be logged in to upload documents");
-      return;
+      throw new Error("You must be logged in to upload documents");
     }
 
     setUploading(true);
 
     try {
-      const idempotencyKey =
-        typeof crypto !== "undefined" && "randomUUID" in crypto
-          ? crypto.randomUUID()
-          : `key-${Date.now()}`;
+      const docs = Array.from(files);
+      const normalizedDescription = description.trim() || "Uploaded file";
 
-      await uploadDocument(file, {
-        title: file.name,
-        description: "Uploaded file",
-        idempotencyKey,
-        token,
-      });
+      const results = await Promise.allSettled(
+        docs.map(async (file) => {
+          const idempotencyKey =
+            typeof crypto !== "undefined" && "randomUUID" in crypto
+              ? crypto.randomUUID()
+              : `key-${Date.now()}-${file.name}`;
+
+          return uploadDocument(file, {
+            title: file.name,
+            description: normalizedDescription,
+            idempotencyKey,
+            token,
+          });
+        })
+      );
+
+      const failed = results.filter((r) => r.status === "rejected");
+      if (failed.length > 0) {
+        const firstError = failed[0] as PromiseRejectedResult;
+        throw new Error(
+          `${failed.length} of ${docs.length} uploads failed. ${(firstError.reason as Error)?.message ?? ""}`.trim()
+        );
+      }
 
       // trigger refetch
       setRefreshKey((k) => k + 1);
-    } catch (err) {
-      alert(`Upload failed: ${(err as Error).message}`);
     } finally {
       setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
     }
   };
 
   return (
     <>
-      <input
-        ref={fileRef}
-        type="file"
-        onChange={onFileChange}
-        className="hidden"
+      <UploadFormModal
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        onUpload={handleUpload}
+        isUploading={uploading}
       />
 
       <div className="flex items-center mb-6">
@@ -76,7 +83,7 @@ export const Documents = () => {
 
         <button
           className="bg-black text-white px-4 py-2 rounded-lg disabled:opacity-60"
-          onClick={onUploadClick}
+          onClick={() => setUploadModalOpen(true)}
           disabled={uploading}
         >
           {uploading ? "Uploading..." : "Upload Files"}
