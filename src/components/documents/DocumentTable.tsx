@@ -5,6 +5,7 @@ import { StatusBadge } from "./StatusBadge";
 import { useDocuments } from "../../hooks/useDocuments";
 import { deleteDocument } from "../../api/documents.api";
 import { useAuth } from "../common/AuthContext";
+import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 
 interface DocumentTableProps {
   refreshKey: number;
@@ -16,8 +17,21 @@ export const DocumentTable = ({ refreshKey, searchQuery, onDeleted }: DocumentTa
   const { documents: docs, loading, error } = useDocuments(refreshKey, searchQuery);
   const { token } = useAuth();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [pendingDeleteDoc, setPendingDeleteDoc] = useState<DocumentDto | null>(null);
 
-  const handleDelete = async (doc: DocumentDto) => {
+  const handleDeleteClick = (doc: DocumentDto) => {
+    setPendingDeleteDoc(doc);
+  };
+
+  const closeDeleteModal = () => {
+    if (deletingId) return;
+    setPendingDeleteDoc(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    const doc = pendingDeleteDoc;
+    if (!doc) return;
+
     if (!doc.id) {
       alert("Document id is missing");
       return;
@@ -28,12 +42,10 @@ export const DocumentTable = ({ refreshKey, searchQuery, onDeleted }: DocumentTa
       return;
     }
 
-    const confirmed = window.confirm(`Delete "${doc.title}"?`);
-    if (!confirmed) return;
-
     try {
       setDeletingId(doc.id);
       await deleteDocument(doc.id, token);
+      setPendingDeleteDoc(null);
       onDeleted();
     } catch (err) {
       alert(`Delete failed: ${(err as Error).message}`);
@@ -50,8 +62,17 @@ export const DocumentTable = ({ refreshKey, searchQuery, onDeleted }: DocumentTa
   }
 
   return (
-    <div className="bg-white rounded-xl border overflow-hidden">
-      <table className="w-full text-sm">
+    <>
+      <DeleteConfirmationModal
+        isOpen={Boolean(pendingDeleteDoc)}
+        onClose={closeDeleteModal}
+        onConfirm={handleDeleteConfirm}
+        documentName={pendingDeleteDoc?.title ?? ""}
+        isDeleting={Boolean(deletingId)}
+      />
+
+      <div className="bg-white rounded-xl border overflow-hidden">
+        <table className="w-full text-sm">
         <thead className="bg-gray-50 text-left text-gray-600">
           <tr>
             <th className="px-6 py-3">Name</th>
@@ -102,7 +123,7 @@ export const DocumentTable = ({ refreshKey, searchQuery, onDeleted }: DocumentTa
                 </button>
                 <button
                   className="text-red-500 hover:text-red-700 disabled:opacity-50"
-                  onClick={() => handleDelete(doc)}
+                  onClick={() => handleDeleteClick(doc)}
                   disabled={deletingId === doc.id}
                   title={deletingId === doc.id ? "Deleting..." : "Delete"}
                 >
@@ -112,7 +133,8 @@ export const DocumentTable = ({ refreshKey, searchQuery, onDeleted }: DocumentTa
             </tr>
           ))}
         </tbody>
-      </table>
-    </div>
+        </table>
+      </div>
+    </>
   );
 };
