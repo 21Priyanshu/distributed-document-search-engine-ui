@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { getDocumentStatus, getDocuments } from "../api/documents.api";
+import { searchDocuments } from "../api/search.api";
 import type { DocumentDto, DocumentStatus } from "../types/documents";
 import { useAuth } from "../components/common/AuthContext";
-import type { PageResponse } from "../types/PageResponse";
 
 const POLL_INTERVAL_MS = 3000;
 const TERMINAL_STATUSES: DocumentStatus[] = ["READY", "COMPLETED", "FAILED"];
 
-export function useDocuments(refreshKey: number) {
+export function useDocuments(refreshKey: number, searchQuery = "") {
   const [documents, setDocuments] = useState<DocumentDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,11 +33,14 @@ export function useDocuments(refreshKey: number) {
       setError(null);
 
       try {
-        const page: PageResponse<DocumentDto> = await getDocuments(token);
+        const normalizedQuery = searchQuery.trim();
+        const data = normalizedQuery
+          ? await searchDocuments(normalizedQuery, token)
+          : (await getDocuments(token)).content;
 
         if (mounted) {
-          setDocuments(page.content);
-          documentsRef.current = page.content;
+          setDocuments(data);
+          documentsRef.current = data;
         }
       } catch {
         if (mounted) setError("Failed to load documents");
@@ -51,7 +54,7 @@ export function useDocuments(refreshKey: number) {
     return () => {
       mounted = false;
     };
-  }, [token, refreshKey]);
+  }, [token, refreshKey, searchQuery]);
 
   useEffect(() => {
     if (!token) return;

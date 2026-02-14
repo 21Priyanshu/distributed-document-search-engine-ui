@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DocumentTable } from "../components/documents/DocumentTable";
 import { uploadDocument } from "../api/documents.api";
 import { useAuth } from "../components/common/AuthContext";
@@ -6,10 +6,20 @@ import { useAuth } from "../components/common/AuthContext";
 export const Documents = () => {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
 
   const [refreshKey, setRefreshKey] = useState<number>(0);
 
   const { token } = useAuth();
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [searchQuery]);
 
   const onUploadClick = () => fileRef.current?.click();
 
@@ -37,7 +47,7 @@ export const Documents = () => {
         token,
       });
 
-      // ✅ trigger refetch
+      // trigger refetch
       setRefreshKey((k) => k + 1);
     } catch (err) {
       alert(`Upload failed: ${(err as Error).message}`);
@@ -59,6 +69,8 @@ export const Documents = () => {
       <div className="flex items-center mb-6">
         <input
           placeholder="Search documents..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="flex-1 mr-4 px-4 py-2 rounded-lg bg-gray-100 focus:outline-none"
         />
 
@@ -71,8 +83,8 @@ export const Documents = () => {
         </button>
       </div>
 
-      {/* ✅ PASS IT HERE */}
-      <DocumentTable refreshKey={refreshKey} />
+      {/*PASS IT HERE */}
+      <DocumentTable refreshKey={refreshKey} searchQuery={debouncedSearchQuery} />
     </>
   );
 };

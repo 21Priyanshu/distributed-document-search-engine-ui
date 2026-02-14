@@ -5,10 +5,11 @@ import { useDocuments } from "../../hooks/useDocuments";
 
 interface DocumentTableProps {
   refreshKey: number;
+  searchQuery: string;
 }
 
-export const DocumentTable = ({ refreshKey }: DocumentTableProps) => {
-  const { documents: docs, loading, error } = useDocuments(refreshKey);
+export const DocumentTable = ({ refreshKey, searchQuery }: DocumentTableProps) => {
+  const { documents: docs, loading, error } = useDocuments(refreshKey, searchQuery);
 
   if (loading) return <p>Loading documents...</p>;
   if (error) return <p>{error}</p>;
