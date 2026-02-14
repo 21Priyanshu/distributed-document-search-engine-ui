@@ -1,8 +1,7 @@
 export type DocumentStatus =
   | "UPLOADED"
-  | "PROCESSING"
+  | "INDEXING"
   | "READY"
-  | "COMPLETED"
   | "FAILED";
 
 export interface DocumentDto {

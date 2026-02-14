@@ -5,6 +5,7 @@ type SearchResultItem = {
   documentId?: string;
   title: string;
   description: string;
+  fileSize?: number;
   createdAt: string;
   status?: DocumentStatus;
 };
@@ -19,6 +20,8 @@ function normalizeSearchResult(item: SearchResultItem): DocumentDto {
     id: item.id ?? item.documentId ?? "",
     title: item.title,
     description: item.description,
+    fileSize: typeof item.fileSize === "number" ? item.fileSize : undefined,
+    size: typeof item.fileSize === "number" ? item.fileSize : undefined,
     createdAt: item.createdAt,
     status: item.status ?? "UPLOADED",
   };

@@ -5,7 +5,7 @@ import type { DocumentDto, DocumentStatus } from "../types/documents";
 import { useAuth } from "../components/common/AuthContext";
 
 const POLL_INTERVAL_MS = 3000;
-const TERMINAL_STATUSES: DocumentStatus[] = ["READY", "COMPLETED", "FAILED"];
+const TERMINAL_STATUSES: DocumentStatus[] = ["READY", "FAILED"];
 
 export function useDocuments(refreshKey: number, searchQuery = "") {
   const [documents, setDocuments] = useState<DocumentDto[]>([]);

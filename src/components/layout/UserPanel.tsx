@@ -55,11 +55,9 @@ export const UserPanel = ({
   onLogout,
 }: Props) => {
   const total = documents.length;
-  const completed = documents.filter(
-    (d) => d.status === "COMPLETED" || d.status === "READY"
-  ).length;
+  const completed = documents.filter((d) => d.status === "READY").length;
   const pending = documents.filter((d) => d.status === "UPLOADED").length;
-  const processing = documents.filter((d) => d.status === "PROCESSING").length;
+  const indexing = documents.filter((d) => d.status === "INDEXING").length;
   const failed = documents.filter((d) => d.status === "FAILED").length;
   const totalSizeBytes = documents.reduce(
     (acc, doc) => acc + getSizeInBytes(doc.size, doc.fileSize),
@@ -130,9 +128,9 @@ export const UserPanel = ({
               <div className="flex items-center justify-between text-sm">
                 <span className="inline-flex items-center gap-2">
                   <Clock size={16} className="text-blue-600" />
-                  Processing
+                  Indexing
                 </span>
-                <span className="font-medium">{processing}</span>
+                <span className="font-medium">{indexing}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="inline-flex items-center gap-2">
