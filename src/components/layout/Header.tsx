@@ -2,9 +2,10 @@ import { Menu, User } from "lucide-react";
 
 type Props = {
   onMenuClick: () => void;
+  onUserClick: () => void;
 };
 
-export const Header = ({ onMenuClick }: Props) => {
+export const Header = ({ onMenuClick, onUserClick }: Props) => {
   return (
     <header className="h-16 bg-white border-b flex items-center px-6 justify-between">
       
@@ -28,7 +29,7 @@ export const Header = ({ onMenuClick }: Props) => {
       </div>
 
       {/* Right */}
-      <button className="p-2 hover:bg-gray-100 rounded-full">
+      <button onClick={onUserClick} className="p-2 hover:bg-gray-100 rounded-full">
         <User size={20} />
       </button>
     </header>

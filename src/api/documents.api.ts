@@ -64,12 +64,17 @@ export interface PageResponse<T> {
 type BackendDocumentDto = Omit<DocumentDto, "id"> & {
   id?: string;
   documentId?: string;
+  fileSize?: number;
 };
 
 function normalizeDocument(document: BackendDocumentDto): DocumentDto {
   return {
     ...document,
     id: document.id ?? document.documentId ?? "",
+    fileSize: typeof document.fileSize === "number" ? document.fileSize : undefined,
+    size:
+      document.size ??
+      (typeof document.fileSize === "number" ? document.fileSize : undefined),
   };
 }
 

@@ -11,4 +11,6 @@ export interface DocumentDto {
   description: string;
   status: DocumentStatus;
   createdAt: string; // ISO timestamp from backend
+  fileSize?: number;
+  size?: number | string;
 }

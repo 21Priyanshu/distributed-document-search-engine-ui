@@ -13,6 +13,13 @@ interface DocumentTableProps {
   onDeleted: () => void;
 }
 
+function formatFileSize(fileSize?: number): string {
+  if (typeof fileSize !== "number" || !Number.isFinite(fileSize)) return "N/A";
+  if (fileSize < 1024) return `${fileSize} B`;
+  if (fileSize < 1024 * 1024) return `${(fileSize / 1024).toFixed(1)} KB`;
+  return `${(fileSize / (1024 * 1024)).toFixed(2)} MB`;
+}
+
 export const DocumentTable = ({ refreshKey, searchQuery, onDeleted }: DocumentTableProps) => {
   const { documents: docs, loading, error } = useDocuments(refreshKey, searchQuery);
   const { token } = useAuth();
@@ -78,6 +85,7 @@ export const DocumentTable = ({ refreshKey, searchQuery, onDeleted }: DocumentTa
             <th className="px-6 py-3">Name</th>
             <th className="px-6 py-3">Description</th>
             <th className="px-6 py-3">Status</th>
+            <th className="px-6 py-3">File Size</th>
             <th className="px-6 py-3">Uploaded By</th>
             <th className="px-6 py-3">Upload Date</th>
             <th className="px-6 py-3 text-right">Actions</th>
@@ -104,6 +112,11 @@ export const DocumentTable = ({ refreshKey, searchQuery, onDeleted }: DocumentTa
               {/* Status */}
               <td className="px-6 py-4">
                 <StatusBadge status={doc.status} />
+              </td>
+
+              {/* File Size */}
+              <td className="px-6 py-4 text-gray-600">
+                {formatFileSize(doc.fileSize)}
               </td>
 
               {/* Uploaded By */}
