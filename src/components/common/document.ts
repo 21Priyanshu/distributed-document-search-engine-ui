@@ -1,6 +1,7 @@
 export const DOCUMENT_STATUSES = [
   "UPLOADED",
   "PROCESSING",
+  "READY",
   "COMPLETED",
   "FAILED"
 ] as const;

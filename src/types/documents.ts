@@ -1,6 +1,7 @@
 export type DocumentStatus =
   | "UPLOADED"
   | "PROCESSING"
+  | "READY"
   | "COMPLETED"
   | "FAILED";
 

@@ -3,10 +3,10 @@ import { LoginPage } from "./pages/LoginPage";
 import { AppLayout } from "./components/layout/AppLayout";
 import { ProtectedRoute } from "./components/common/ProtectedRoute";
 import { Documents } from "./pages/Documents";
+import { useAuth } from "./components/common/AuthContext";
 
 function App() {
-  const token = localStorage.getItem("token");
-  console.log("App render, token:", token);
+  const { token } = useAuth();
   return (
     <BrowserRouter>
       <Routes>
