@@ -1,15 +1,46 @@
 import { Download, Trash2, FileText } from "lucide-react";
+import { useState } from "react";
 import type { DocumentDto } from "../../types/documents";
 import { StatusBadge } from "./StatusBadge";
 import { useDocuments } from "../../hooks/useDocuments";
+import { deleteDocument } from "../../api/documents.api";
+import { useAuth } from "../common/AuthContext";
 
 interface DocumentTableProps {
   refreshKey: number;
   searchQuery: string;
+  onDeleted: () => void;
 }
 
-export const DocumentTable = ({ refreshKey, searchQuery }: DocumentTableProps) => {
+export const DocumentTable = ({ refreshKey, searchQuery, onDeleted }: DocumentTableProps) => {
   const { documents: docs, loading, error } = useDocuments(refreshKey, searchQuery);
+  const { token } = useAuth();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async (doc: DocumentDto) => {
+    if (!doc.id) {
+      alert("Document id is missing");
+      return;
+    }
+
+    if (!token) {
+      alert("You must be logged in to delete documents");
+      return;
+    }
+
+    const confirmed = window.confirm(`Delete "${doc.title}"?`);
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(doc.id);
+      await deleteDocument(doc.id, token);
+      onDeleted();
+    } catch (err) {
+      alert(`Delete failed: ${(err as Error).message}`);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   if (loading) return <p>Loading documents...</p>;
   if (error) return <p>{error}</p>;
@@ -69,7 +100,12 @@ export const DocumentTable = ({ refreshKey, searchQuery }: DocumentTableProps) =
                 <button className="text-gray-600 hover:text-black">
                   <Download size={16} />
                 </button>
-                <button className="text-red-500 hover:text-red-700">
+                <button
+                  className="text-red-500 hover:text-red-700 disabled:opacity-50"
+                  onClick={() => handleDelete(doc)}
+                  disabled={deletingId === doc.id}
+                  title={deletingId === doc.id ? "Deleting..." : "Delete"}
+                >
                   <Trash2 size={16} />
                 </button>
               </td>

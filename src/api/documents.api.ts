@@ -118,3 +118,25 @@ export async function getDocumentStatus(
 
   return response.json();
 }
+
+export async function deleteDocument(
+  documentId: string,
+  token: string
+): Promise<void> {
+  const response = await fetch(`http://localhost:8080/documents/${documentId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    credentials: "include",
+  });
+
+  if (response.status === 204) {
+    return;
+  }
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || `Failed to delete document: ${response.status}`);
+  }
+}

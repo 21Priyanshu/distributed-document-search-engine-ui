@@ -84,7 +84,11 @@ export const Documents = () => {
       </div>
 
       {/*PASS IT HERE */}
-      <DocumentTable refreshKey={refreshKey} searchQuery={debouncedSearchQuery} />
+      <DocumentTable
+        refreshKey={refreshKey}
+        searchQuery={debouncedSearchQuery}
+        onDeleted={() => setRefreshKey((k) => k + 1)}
+      />
     </>
   );
 };
