@@ -8,6 +8,8 @@ import {
 import { generateToken } from "../../api/auth.api";
 
 const STORAGE_KEY = "authToken";
+const LEGACY_STORAGE_KEY = "token";
+const USER_STORAGE_KEY = "authUser";
 
 type AuthContextType = {
   token: string | null;
@@ -31,12 +33,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = useCallback(async (userId?: string) => {
     const t = await generateToken(userId);
     localStorage.setItem(STORAGE_KEY, t);
+    if (userId) localStorage.setItem(USER_STORAGE_KEY, userId);
     setToken(t);
     return t;
   }, []);
 
   const logout = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+    localStorage.removeItem(USER_STORAGE_KEY);
     setToken(null);
   }, []);
 

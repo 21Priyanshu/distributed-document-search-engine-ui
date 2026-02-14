@@ -7,6 +7,8 @@ import { useAuth } from "../common/AuthContext";
 import { useDocuments } from "../../hooks/useDocuments";
 
 function getUserFromToken(token: string | null): string {
+  const storedUser = localStorage.getItem("authUser");
+  if (storedUser) return storedUser;
   if (!token) return "User";
   try {
     const payloadPart = token.split(".")[1];
@@ -44,6 +46,7 @@ export const AppLayout = () => {
 
   const handleLogout = () => {
     logout();
+    setSidebarOpen(false);
     setUserPanelOpen(false);
     navigate("/login", { replace: true });
   };
